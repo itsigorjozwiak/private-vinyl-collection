@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="pl">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title><%= title %></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Righteous&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+  </head>
+  <body>
+
+    <% if (typeof errorMsg != 'undefined' && errorMsg) { %>
+        <div class="alert alert-danger text-center m-0 rounded-0" role="alert">
+            <%= errorMsg %>
+        </div>
+    <% } %>
+    <% if (typeof successMsg != 'undefined' && successMsg) { %>
+        <div class="alert alert-success text-center m-0 rounded-0" role="alert">
+            <%= successMsg %>
+        </div>
+    <% } %>
+
+    <header class="jazz-header">
+        <div class="auth-buttons">
+            <% if (locals.currentUser) { %>
+                <span class="text-gold fw-bold">Witaj, <%= locals.userName || 'Melomanie' %>!</span>
+                <a href="/logout" class="btn btn-outline-warning btn-sm">Wyloguj</a>
+                <button class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">Usuń konto</button>
+            <% } else { %>
+                <button class="btn btn-outline-warning btn-sm" data-bs-toggle="modal" data-bs-target="#loginModal">Zaloguj</button>
+                <button class="btn btn-gold btn-sm" data-bs-toggle="modal" data-bs-target="#registerModal">Rejestracja</button>
+            <% } %>
+        </div>
+
+        <img src="/images/saksofon.png" class="sax-deco sax-left" alt="Sax Left">
+        <img src="/images/saksofon.png" class="sax-deco sax-right" alt="Sax Right">
+
+        <div class="container text-center position-relative" style="z-index: 1;">
+            <a href="/" class="text-decoration-none">
+                <img src="/images/winylovenia.png" class="img-fluid logo-raw" alt="Winylovenia Logo">
+            </a>
+            <p class="lead text-gold mt-2 opacity-75" style="letter-spacing: 2px;">DOMOWE ARCHIWUM DOBREGO BRZMIENIA</p>
+        </div>
+    </header>
+
+    <div class="container mb-5">
+      
+      <% if (locals.currentUser) { %>
+      <div class="row mb-5 justify-content-center">
+        <div class="col-lg-10">
+          <form action="/" method="GET" id="searchForm" class="card bg-dark border-warning p-3 shadow-lg">
+            <div class="row g-2 align-items-end">
+                <div class="col-md-5">
+                    <label class="text-gold small ms-2">Szukaj (Tytuł/Autor)</label>
+                    <input type="text" name="szukaj" class="form-control" 
+                           placeholder="Zacznij pisać..." 
+                           value="<%= typeof szukanaFraza != 'undefined' ? szukanaFraza : '' %>"
+                           oninput="liveSearch(this)">
+                </div>
+                <div class="col-md-3">
+                    <label class="text-gold small ms-2">Gatunek</label>
+                    <select name="filtrGatunek" class="form-select" onchange="this.form.submit()">
+                        <option value="">Wszystkie</option>
+                        <option value="Jazz" <%= (typeof filtrGatunek != 'undefined' && filtrGatunek == 'Jazz') ? 'selected' : '' %>>Jazz</option>
+                        <option value="Rock" <%= (typeof filtrGatunek != 'undefined' && filtrGatunek == 'Rock') ? 'selected' : '' %>>Rock</option>
+                        <option value="Pop" <%= (typeof filtrGatunek != 'undefined' && filtrGatunek == 'Pop') ? 'selected' : '' %>>Pop</option>
+                        <option value="Klasyczna" <%= (typeof filtrGatunek != 'undefined' && filtrGatunek == 'Klasyczna') ? 'selected' : '' %>>Klasyczna</option>
+                        <option value="Inne" <%= (typeof filtrGatunek != 'undefined' && filtrGatunek == 'Inne') ? 'selected' : '' %>>Inne</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="text-gold small ms-2">Rok</label>
+                    <input type="number" name="filtrRok" class="form-control" placeholder="Rok"
+                           value="<%= typeof filtrRok != 'undefined' ? filtrRok : '' %>">
+                </div>
+                <div class="col-md-2 d-grid">
+                    <button type="submit" class="btn btn-gold">FILTRUJ</button>
+                </div>
+            </div>
+          </form>
+          <% if ((typeof szukanaFraza != 'undefined' && szukanaFraza) || (typeof filtrGatunek != 'undefined' && filtrGatunek) || (typeof filtrRok != 'undefined' && filtrRok)) { %>
+            <div class="text-center mt-2">
+                <a href="/" class="text-danger text-decoration-none fw-bold">✕ Wyczyść filtry</a>
+            </div>
+          <% } %>
+        </div>
+      </div>
+      <% } %>
+
+      <div class="d-flex justify-content-between align-items-center mb-4 border-bottom border-warning pb-2">
+        <h2 class="m-0">
+            <% if (locals.currentUser) { %>
+                <% if ((typeof szukanaFraza != 'undefined' && szukanaFraza) || (typeof filtrGatunek != 'undefined' && filtrGatunek)) { %>
+                    Wyniki wyszukiwania
+                <% } else { %>
+                    🏆 Twoja Biblioteka
+                <% } %>
+            <% } else { %>
+                🎵 Witaj w Winylovenii
+            <% } %>
+        </h2>
+        
+        <% if (locals.currentUser) { %>
+            <button type="button" class="btn btn-gold shadow" data-bs-toggle="modal" data-bs-target="#dodajModal">
+            + DODAJ PŁYTĘ
+            </button>
+        <% } %>
+      </div>
+
+      <div class="row g-4">
+        <% if (!locals.currentUser) { %>
+             <div class="col-12 text-center py-5">
+                <h3 class="empty-state-text">Zaloguj się, aby zobaczyć swoją kolekcję.</h3>
+                <p class="empty-state-sub">Twoja prywatna biblioteka czeka.</p>
+             </div>
+        <% } else if (winyle.length === 0) { %>
+          <div class="col-12 text-center py-5">
+            <h3 class="empty-state-text">Kolekcja jest pusta...</h3>
+            <p class="empty-state-sub">Zmień filtry lub dodaj pierwszą płytę!</p>
+          </div>
+        <% } else { %>
+          <% winyle.forEach(function(plyta) { %>
+            <div class="col-sm-6 col-md-4 col-lg-3">
+              <div class="card h-100 vinyl-card">
+                
+                <div class="card-actions">
+                    <button class="action-btn btn-edit" onclick="otworzEdycje('<%= plyta._id %>', '<%= plyta.tytul %>', '<%= plyta.wykonawca %>', '<%= plyta.rok %>', '<%= plyta.ocena %>', '<%= plyta.gatunek %>')">✎</button>
+                    <a href="/usun/<%= plyta._id %>" class="action-btn btn-delete text-decoration-none" onclick="return confirm('Na pewno usunąć?')">✕</a>
+                </div>
+
+                <div class="card-img-wrapper">
+                    <% if (plyta.okladka) { %>
+                        <img src="<%= plyta.okladka %>" class="w-100 h-100 object-fit-cover" alt="Okładka">
+                    <% } else { %>
+                        <div class="default-cover-bg">
+                            <img src="/images/nuta.png" class="note-icon" alt="Brak okładki">
+                        </div>
+                    <% } %>
+                    <span class="position-absolute top-0 end-0 badge bg-danger m-2 shadow"><%= plyta.gatunek %></span>
+                </div>
+                
+                <div class="card-body text-center">
+                  <h5 class="card-title text-gold fw-bold text-truncate"><%= plyta.tytul %></h5>
+                  <p class="card-text text-light opacity-75 mb-1"><%= plyta.wykonawca %></p>
+                  
+                  <div class="stars-outer">
+                    <div class="stars-inner" style="width: <%= ((plyta.ocena || 0) / 5) * 100 %>%;"></div>
+                  </div>
+
+                  <div class="mt-2"><small class="text-secondary"><%= plyta.rok %></small></div>
+                </div>
+              </div>
+            </div>
+          <% }); %>
+        <% } %>
+      </div>
+
+    </div>
+
+    <footer class="jazz-footer">
+        <div class="container">
+            <p class="mb-0">&copy; 2026 Winylovenia. Wszystkie prawa zastrzeżone.</p>
+            <small>Twój winylowy zakątek w Sieci</small>
+        </div>
+    </footer>
+
+    <div class="modal fade" id="dodajModal" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark text-light border-warning">
+          <div class="modal-header border-secondary">
+            <h5 class="modal-title">Nowa Płyta do Kolekcji</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          </div>
+          <form action="/dodaj" method="POST" enctype="multipart/form-data">
+            <div class="modal-body">
+              <div class="mb-3">
+                <label>Tytuł <span class="text-danger">*</span></label>
+                <input type="text" name="tytul" class="form-control" required>
+              </div>
+              <div class="mb-3">
+                <label>Wykonawca <span class="text-danger">*</span></label>
+                <input type="text" name="wykonawca" class="form-control" required>
+              </div>
+              
+              <div class="row">
+                  <div class="col-6 mb-3">
+                    <label>Gatunek</label>
+                    <select name="gatunek" id="selectGatunekDodaj" class="form-select" onchange="toggleCustomGenre('selectGatunekDodaj', 'inputGatunekDodaj')">
+                        <option value="Jazz">Jazz</option>
+                        <option value="Rock">Rock</option>
+                        <option value="Pop">Pop</option>
+                        <option value="Klasyczna">Klasyczna</option>
+                        <option value="Inne">Inne (Wpisz własny)</option>
+                    </select>
+                    <input type="text" name="gatunekCustom" id="inputGatunekDodaj" class="form-control mt-2" placeholder="Wpisz gatunek..." style="display:none;">
+                  </div>
+                  <div class="col-6 mb-3">
+                    <label>Rok</label>
+                    <input type="number" name="rok" class="form-control" min="1900" max="2099">
+                  </div>
+              </div>
+
+              <div class="mb-3">
+                <label class="text-gold fw-bold">Ocena (0-5)</label>
+                <input type="number" name="ocena" class="form-control" 
+                       min="0" max="5" step="0.5" placeholder="np. 4.5">
+              </div>
+
+              <div class="mb-3">
+                <label>Okładka (Wybierz plik)</label>
+                <input type="file" name="okladkaPlik" class="form-control" accept="image/*">
+              </div>
+            </div>
+            <div class="modal-footer border-secondary">
+              <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Anuluj</button>
+              <button type="submit" class="btn btn-gold">Zapisz</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="editModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content bg-dark text-light border-warning">
+            <div class="modal-header border-secondary">
+              <h5 class="modal-title">Edytuj Płytę</h5>
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="/edytuj" method="POST">
+              <input type="hidden" name="id" id="editId">
+              <div class="modal-body">
+                <div class="mb-3">
+                  <label>Tytuł <span class="text-danger">*</span></label>
+                  <input type="text" name="tytul" id="editTytul" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                  <label>Wykonawca <span class="text-danger">*</span></label>
+                  <input type="text" name="wykonawca" id="editWykonawca" class="form-control" required>
+                </div>
+                
+                <div class="row">
+                    <div class="col-6 mb-3">
+                      <label>Gatunek</label>
+                      <select name="gatunek" id="selectGatunekEdytuj" class="form-select" onchange="toggleCustomGenre('selectGatunekEdytuj', 'inputGatunekEdytuj')">
+                          <option value="Jazz">Jazz</option>
+                          <option value="Rock">Rock</option>
+                          <option value="Pop">Pop</option>
+                          <option value="Klasyczna">Klasyczna</option>
+                          <option value="Inne">Inne / Obecny</option>
+                      </select>
+                      <input type="text" name="gatunekCustom" id="inputGatunekEdytuj" class="form-control mt-2" placeholder="Zmień gatunek...">
+                    </div>
+                    <div class="col-6 mb-3">
+                      <label>Rok</label>
+                      <input type="number" name="rok" id="editRok" class="form-control" min="1900" max="2099">
+                    </div>
+                </div>
+  
+                <div class="mb-3">
+                  <label class="text-gold fw-bold">Ocena (0-5)</label>
+                  <input type="number" name="ocena" id="editOcena" class="form-control" 
+                         min="0" max="5" step="0.5">
+                </div>
+              </div>
+              <div class="modal-footer border-secondary">
+                <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Anuluj</button>
+                <button type="submit" class="btn btn-gold">Zapisz Zmiany</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+    <div class="modal fade" id="loginModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content bg-dark text-light border-warning">
+            <div class="modal-header border-secondary">
+              <h5 class="modal-title text-gold">Zaloguj się</h5>
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            
+            <div id="loginError" class="alert alert-danger d-none m-3"></div>
+
+            <form id="loginForm">
+              <div class="modal-body">
+                <div class="mb-3">
+                  <label>Email lub Nick <span class="text-danger">*</span></label>
+                  <input type="text" name="loginInput" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                  <label>Hasło <span class="text-danger">*</span></label>
+                  <input type="password" name="haslo" class="form-control" required>
+                </div>
+              </div>
+              <div class="modal-footer border-secondary">
+                <button type="submit" class="btn btn-gold w-100">WEJDŹ</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+  
+      <div class="modal fade" id="registerModal" tabindex="-1">
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-dark text-light border-warning">
+              <div class="modal-header border-secondary">
+                <h5 class="modal-title text-gold">Dołącz do Klubu</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+              </div>
+
+              <div id="registerError" class="alert alert-danger d-none m-3"></div>
+
+              <form id="registerForm">
+                <div class="modal-body">
+                  <div class="mb-3">
+                    <label>Nick (Nazwa Użytkownika) <span class="text-danger">*</span></label>
+                    <input type="text" name="nick" class="form-control" required>
+                  </div>
+                  <div class="mb-3">
+                    <label>Adres Email <span class="text-danger">*</span></label>
+                    <input type="email" name="email" class="form-control" required>
+                  </div>
+                  <div class="mb-3">
+                    <label>Hasło <span class="text-danger">*</span></label>
+                    <input type="password" name="haslo" class="form-control" required>
+                  </div>
+                </div>
+                <div class="modal-footer border-secondary">
+                  <button type="submit" class="btn btn-gold w-100">ZAREJESTRUJ SIĘ</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+      <div class="modal fade" id="deleteAccountModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content bg-danger text-white border-white">
+            <div class="modal-header border-white">
+              <h5 class="modal-title">Usuwanie Konta</h5>
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Czy na pewno chcesz usunąć konto? <br><strong>Ta operacja usunie wszystkie Twoje płyty bezpowrotnie.</strong></p>
+            </div>
+            <div class="modal-footer border-white">
+                <form action="/delete-account" method="POST">
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Anuluj</button>
+                    <button type="submit" class="btn btn-dark fw-bold">Tak, usuń wszystko</button>
+                </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            const alerts = document.querySelectorAll('.alert');
+            if (alerts.length > 0) {
+                setTimeout(() => {
+                    alerts.forEach(alert => {
+                        alert.style.transition = 'opacity 0.5s ease';
+                        alert.style.opacity = '0';
+                        setTimeout(() => alert.remove(), 500);
+                    });
+                }, 2000);
+            }
+        });
+
+        let timeout = null;
+        function liveSearch(input) {
+            clearTimeout(timeout);
+            timeout = setTimeout(function () {
+                document.getElementById('searchForm').submit();
+            }, 500); 
+        }
+
+        function toggleCustomGenre(selectId, inputId) {
+            const select = document.getElementById(selectId);
+            const input = document.getElementById(inputId);
+            if (select.value === 'Inne') {
+                input.style.display = 'block';
+                input.required = true;
+            } else {
+                input.style.display = 'none';
+                input.required = false;
+            }
+        }
+
+        function otworzEdycje(id, tytul, wykonawca, rok, ocena, gatunek) {
+            document.getElementById('editId').value = id;
+            document.getElementById('editTytul').value = tytul;
+            document.getElementById('editWykonawca').value = wykonawca;
+            document.getElementById('editRok').value = rok;
+            document.getElementById('editOcena').value = ocena;
+            
+            const select = document.getElementById('selectGatunekEdytuj');
+            const input = document.getElementById('inputGatunekEdytuj');
+            
+            let found = false;
+            for(let i=0; i<select.options.length; i++) {
+                if(select.options[i].value === gatunek) {
+                    select.selectedIndex = i;
+                    found = true;
+                    break;
+                }
+            }
+
+            if(found) {
+                toggleCustomGenre('selectGatunekEdytuj', 'inputGatunekEdytuj');
+            } else {
+                select.value = 'Inne';
+                toggleCustomGenre('selectGatunekEdytuj', 'inputGatunekEdytuj');
+                input.value = gatunek;
+            }
+
+            const myModal = new bootstrap.Modal(document.getElementById('editModal'));
+            myModal.show();
+        }
+
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData.entries());
+            const errorDiv = document.getElementById('registerError');
+            
+            try {
+                const response = await fetch('/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    errorDiv.textContent = result.error;
+                    errorDiv.classList.remove('d-none');
+                }
+            } catch (err) {
+                errorDiv.textContent = "Wystąpił błąd połączenia.";
+                errorDiv.classList.remove('d-none');
+            }
+        });
+
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData.entries());
+            const errorDiv = document.getElementById('loginError');
+            
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    errorDiv.textContent = result.error;
+                    errorDiv.classList.remove('d-none');
+                }
+            } catch (err) {
+                errorDiv.textContent = "Wystąpił błąd połączenia.";
+                errorDiv.classList.remove('d-none');
+            }
+        });
+    </script>
+  </body>
+</html>

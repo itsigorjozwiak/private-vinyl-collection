@@ -1,0 +1,250 @@
+body {
+    background: radial-gradient(circle at center, #5d001e 0%, #1a0005 100%);
+    color: #e0e0e0;
+    font-family: 'Roboto', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.jazz-header {
+    position: relative;
+    padding: 40px 0;
+    margin-bottom: 40px;
+    overflow: hidden;
+    border-bottom: 2px solid #d4af37;
+    background: rgba(0,0,0,0.3);
+}
+
+.logo-raw {
+    max-width: 500px;
+    width: 100%;
+    height: auto;
+    filter: drop-shadow(0 0 15px rgba(212, 175, 55, 0.4));
+    transition: transform 0.3s;
+    cursor: pointer;
+}
+
+.logo-raw:hover {
+    transform: scale(1.02);
+}
+
+.sax-deco {
+    position: absolute;
+    bottom: 0;
+    height: 180px;
+    opacity: 0.9;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.sax-left {
+    left: 0;
+    transform: rotate(10deg) translateX(-20px);
+}
+
+.sax-right {
+    right: 0;
+    transform: scaleX(-1) rotate(10deg) translateX(-20px);
+}
+
+.auth-buttons {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.jazz-footer {
+    margin-top: auto;
+    background: #0f0003;
+    padding: 30px 0;
+    border-top: 1px solid #d4af37;
+    text-align: center;
+    color: #888;
+}
+
+.vinyl-card {
+    background: rgba(0, 0, 0, 0.6) !important;
+    border: 1px solid #4a0015;
+    backdrop-filter: blur(5px);
+    transition: transform 0.3s, box-shadow 0.3s;
+    position: relative;
+}
+
+.vinyl-card:hover {
+    transform: translateY(-5px);
+    border-color: #d4af37;
+    box-shadow: 0 0 25px rgba(212, 175, 55, 0.2);
+}
+
+.card-actions {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    gap: 5px;
+    opacity: 0;
+    transition: opacity 0.2s;
+    z-index: 10;
+}
+
+.vinyl-card:hover .card-actions {
+    opacity: 1;
+}
+
+.action-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.btn-edit { background: #d4af37; color: #000; }
+.btn-delete { background: #dc3545; color: #fff; }
+
+.card-img-wrapper {
+    height: 250px;
+    overflow: hidden;
+    position: relative;
+    border-bottom: 1px solid #d4af37;
+}
+
+.default-cover-bg {
+    width: 100%;
+    height: 100%;
+    background-color: #eaddcf;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.note-icon {
+    max-width: 50%;
+    max-height: 80%;
+    width: auto;
+    height: auto;
+    opacity: 0.9;
+    object-fit: contain;
+}
+
+.stars-outer {
+    display: inline-block;
+    position: relative;
+    font-size: 1.2rem;
+    letter-spacing: 2px;
+}
+
+.stars-outer::before {
+    content: "\2605\2605\2605\2605\2605";
+    color: #444;
+}
+
+.stars-inner {
+    position: absolute;
+    top: 0;
+    left: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    width: 0;
+}
+
+.stars-inner::before {
+    content: "\2605\2605\2605\2605\2605";
+    color: #ffd700;
+}
+
+h1, h2, h3, .modal-title { 
+    font-family: 'Righteous', cursive; 
+    color: #d4af37; 
+}
+
+.empty-state-text {
+    color: #d4af37 !important;
+    opacity: 0.9;
+    text-shadow: 0 0 10px rgba(0,0,0,0.8);
+    font-size: 1.8rem;
+}
+
+.empty-state-sub {
+    color: #f0e6d2 !important; 
+    opacity: 0.8;
+}
+
+.text-gold { color: #d4af37 !important; }
+
+.btn-gold {
+    background: linear-gradient(to bottom, #d4af37, #aa8c2c);
+    color: #0f0003;
+    font-weight: bold;
+    border: none;
+    text-transform: uppercase;
+}
+
+.btn-gold:hover { 
+    background: #ffd700; 
+    color: #000; 
+}
+
+.form-control, .form-select {
+    background-color: #2a0a12 !important;
+    border: 1px solid #5d001e !important;
+    color: #ffd700 !important;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #d4af37 !important;
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.3) !important;
+}
+
+::placeholder {
+    color: #aa8c2c !important;
+    opacity: 0.7 !important;
+}
+
+input::-webkit-input-placeholder {
+    color: #aa8c2c !important;
+}
+
+.form-select option {
+    background-color: #2a0a12;
+}
+
+.badge {
+    font-weight: normal;
+    letter-spacing: 1px;
+}
+
+@media (max-width: 768px) {
+    .sax-deco {
+        display: none;
+    }
+
+    .jazz-header {
+        padding: 20px 0;
+    }
+
+    .logo-raw {
+        max-width: 80%;
+    }
+
+    .auth-buttons {
+        position: static;
+        display: flex;
+        justify-content: center;
+        margin-bottom: 15px;
+        width: 100%;
+    }
+
+    .container.text-center.position-relative {
+        margin-top: 10px;
+    }
+}
