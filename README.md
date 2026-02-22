@@ -31,6 +31,12 @@ Projekt został w pełni wdrożony w chmurze, co gwarantuje jego wysoką dostęp
 * **Hosting Aplikacji:** Kod serwera hostowany jest na platformie **Render**. Fizycznie usługa działa w serwerowniach Amazona zlokalizowanych we **Frankfurcie**.
 * **Baza Danych:** Aplikacja łączy się z nierelacyjną bazą danych **MongoDB Atlas**. Klaster bazy również został skonfigurowany w regionie **AWS Frankfurt**, co zapewnia błyskawiczną i bezpieczną komunikację między aplikacją webową a danymi użytkowników.
 
+* ## ⚖️ Prawa autorskie i źródła
+
+Projekt został stworzony w celach edukacyjnych. Nie roszczę sobie praw autorskich do wykorzystanych w nim zasobów graficznych:
+* **Logo Winylovenii:** Wygenerowane przy użyciu narzędzi sztucznej inteligencji, a następnie ręcznie dopracowane i spersonalizowane przeze mnie.
+* **Elementy ozdobne (saksofon i nuta):** Pobrane z ogólnodostępnych, darmowych zasobów w Internecie.
+
 
 https://github.com/user-attachments/assets/7d524054-3e67-4d9f-9942-e27168f8dfbe
 
